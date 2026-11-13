@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const { MongoClient } = require('mongodb');
 const app = express();
 
 app.use(function (req, res, next) {
@@ -19,10 +20,26 @@ app.use('/images', function (req, res, next) {
     });
 });
 
-app.get('/', function (req, res) {
-    res.send('Ctrl+Learn back-end is running');
-});
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
 
-app.listen(3000, function () {
-    console.log('Server running on port 3000');
-});
+async function startServer() {
+    await client.connect();
+    const db = client.db('ctrlLearn');
+    console.log('Connected to MongoDB');
+
+    app.get('/', function (req, res) {
+        res.send('Ctrl+Learn back-end is running');
+    });
+
+    app.get('/lessons', async function (req, res) {
+        const lessons = await db.collection('lessons').find({}).toArray();
+        res.json(lessons);
+    });
+
+    app.listen(3000, function () {
+        console.log('Server running on port 3000');
+    });
+}
+
+startServer();
