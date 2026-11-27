@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const app = express();
 
 app.use(express.json());
@@ -52,6 +52,17 @@ async function startServer() {
     app.post('/orders', async function (req, res) {
         const result = await db.collection('orders').insertOne(req.body);
         res.status(201).json({ msg: 'success', insertedId: result.insertedId });
+    });
+
+    app.put('/lessons/:id', async function (req, res) {
+        if (!ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'Invalid ObjectId' });
+        }
+        const result = await db.collection('lessons').updateOne(
+            { _id: new ObjectId(req.params.id) },
+            { $set: req.body }
+        );
+        res.json(result.matchedCount === 1 ? { msg: 'success' } : { msg: 'error' });
     });
 
     app.listen(3000, function () {
