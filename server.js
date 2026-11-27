@@ -49,6 +49,11 @@ async function startServer() {
         res.json(lessons);
     });
 
+    app.post('/orders', async function (req, res) {
+        const result = await db.collection('orders').insertOne(req.body);
+        res.status(201).json({ msg: 'success', insertedId: result.insertedId });
+    });
+
     app.listen(3000, function () {
         console.log('Server running on port 3000');
     });
