@@ -91,6 +91,20 @@ async function startServer() {
         res.json(lessons);
     });
 
+    app.get('/enrolment/:lessonid', async function (req, res) {
+        const lessonId = parseInt(req.params.lessonid);
+        const orders = await db.collection('orders').find({ lessonIDs: lessonId }).toArray();
+        let enrolled = 0;
+        orders.forEach(function (order) {
+            order.lessonIDs.forEach(function (id) {
+                if (id === lessonId) {
+                    enrolled++;
+                }
+            });
+        });
+        res.json({ lessonId: lessonId, enrolled: enrolled });
+    });
+
     app.listen(3000, function () {
         console.log('Server running on port 3000');
     });
