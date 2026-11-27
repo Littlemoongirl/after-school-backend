@@ -77,6 +77,20 @@ async function startServer() {
         res.json(results);
     });
 
+    app.get('/teachers', async function (req, res) {
+        const teachers = await db.collection('teachers').find({}).toArray();
+        res.json(teachers);
+    });
+
+    app.get('/teachers/:id/lessons', async function (req, res) {
+        const teacher = await db.collection('teachers').findOne({ id: parseInt(req.params.id) });
+        if (!teacher) {
+            return res.status(404).json({ msg: 'Teacher not found' });
+        }
+        const lessons = await db.collection('lessons').find({ id: { $in: teacher.lessonIDs } }).toArray();
+        res.json(lessons);
+    });
+
     app.listen(3000, function () {
         console.log('Server running on port 3000');
     });
