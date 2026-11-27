@@ -65,6 +65,18 @@ async function startServer() {
         res.json(result.matchedCount === 1 ? { msg: 'success' } : { msg: 'error' });
     });
 
+    app.get('/search', async function (req, res) {
+        const term = (req.query.q || '').toLowerCase();
+        const lessons = await db.collection('lessons').find({}).toArray();
+        const results = lessons.filter(function (lesson) {
+            return lesson.topic.toLowerCase().includes(term) ||
+                lesson.location.toLowerCase().includes(term) ||
+                String(lesson.price).includes(term) ||
+                String(lesson.space).includes(term);
+        });
+        res.json(results);
+    });
+
     app.listen(3000, function () {
         console.log('Server running on port 3000');
     });
